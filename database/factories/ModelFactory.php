@@ -16,6 +16,7 @@ use CachetHQ\Cachet\Models\IncidentTemplate;
 use CachetHQ\Cachet\Models\Metric;
 use CachetHQ\Cachet\Models\MetricPoint;
 use CachetHQ\Cachet\Models\Subscriber;
+use CachetHQ\Cachet\Models\Subscription;
 use CachetHQ\Cachet\Models\User;
 use Carbon\Carbon;
 
@@ -31,8 +32,9 @@ $factory->define(Component::class, function ($faker) {
 
 $factory->define(ComponentGroup::class, function ($faker) {
     return [
-        'name'  => $faker->words(2, true),
-        'order' => 0,
+        'name'      => $faker->words(2, true),
+        'order'     => 0,
+        'collapsed' => false,
     ];
 });
 
@@ -76,6 +78,16 @@ $factory->define(Subscriber::class, function ($faker) {
         'email'       => $faker->email,
         'verify_code' => 'Mqr80r2wJtxHCW5Ep4azkldFfIwHhw98M9HF04dn0z',
         'verified_at' => Carbon::now(),
+    ];
+});
+
+$factory->define(Subscription::class, function ($faker) {
+    $user = factory(Subscriber::class)->create();
+    $component = factory(Component::class)->create();
+
+    return [
+        'subscriber_id' => $user->id,
+        'component_id'  => $component->id,
     ];
 });
 

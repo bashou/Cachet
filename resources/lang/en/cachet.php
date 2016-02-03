@@ -26,7 +26,6 @@ return [
         'past'          => 'Past Incidents',
         'previous_week' => 'Previous Week',
         'next_week'     => 'Next Week',
-        'none'          => 'Nothing to report',
         'scheduled'     => 'Scheduled Maintenance',
         'scheduled_at'  => ', scheduled :timestamp',
         'status'        => [
@@ -40,8 +39,9 @@ return [
 
     // Service Status
     'service' => [
-        'good' => 'All systems are functional',
-        'bad'  => 'Some systems are experiencing issues',
+        'good'  => '[0,1] System operational|[2,Inf] All systems are operational',
+        'bad'   => '[0,1] The system is currently experiencing issues|[2,Inf] Some systems are experiencing issues',
+        'major' => '[0,1] The service experiencing a major outage|[2,Inf] Some systems are experiencing a major outage',
     ],
 
     'api' => [
@@ -86,6 +86,13 @@ return [
                 'html-preheader' => 'New incident has been reported on :app_name.',
                 'html'           => '<p>New incident has been reported on :app_name.</p><p>Thank you, :app_name</p>',
             ],
+            'component' => [
+                'subject'        => 'Component Status Update',
+                'text'           => 'The component :component_name has seen a status change. The component is now at :component_human_status.\nThank you, :app_name',
+                'html-preheader' => 'Component Update from :app_name',
+                'html'           => '<p>The component :component_name has seen a status change. The component is now at :component_human_status.</p><p>Thank you, :app_name</p>',
+                'tooltip-title'  => 'Subscribe to notifications for :component_name.',
+            ],
         ],
     ],
 
@@ -110,6 +117,16 @@ return [
 
     'system' => [
         'update' => 'There is a newer version of Cachet available. You can learn how to update <a href="https://docs.cachethq.io/docs/updating-cachet">here</a>!',
+    ],
+
+    // Modal
+    'modal' => [
+        'close'     => 'Close',
+        'subscribe' => [
+            'title'  => 'Subscribe to component updates',
+            'body'   => 'Enter your email address to subscribe to updates for this component. If you\'re already subscribed, you\'ll already receive emails for this component.',
+            'button' => 'Subscribe',
+        ],
     ],
 
     // Other

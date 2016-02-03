@@ -11,10 +11,12 @@
 
 namespace CachetHQ\Cachet\Presenters;
 
+use CachetHQ\Cachet\Dates\DateFactory;
 use CachetHQ\Cachet\Presenters\Traits\TimestampsTrait;
-use Jenssegers\Date\Date;
+use Illuminate\Contracts\Support\Arrayable;
+use McCool\LaravelAutoPresenter\BasePresenter;
 
-class SubscriberPresenter extends AbstractPresenter
+class SubscriberPresenter extends BasePresenter implements Arrayable
 {
     use TimestampsTrait;
 
@@ -25,8 +27,7 @@ class SubscriberPresenter extends AbstractPresenter
      */
     public function verified_at()
     {
-        return (new Date($this->wrappedObject->verified_at))
-            ->setTimezone($this->setting->get('app_timezone'))->toDateTimeString();
+        return app(DateFactory::class)->make($this->wrappedObject->verified_at)->toDateTimeString();
     }
 
     /**

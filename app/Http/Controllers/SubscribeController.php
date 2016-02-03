@@ -14,18 +14,25 @@ namespace CachetHQ\Cachet\Http\Controllers;
 use AltThree\Validator\ValidationException;
 use CachetHQ\Cachet\Bus\Commands\Subscriber\SubscribeSubscriberCommand;
 use CachetHQ\Cachet\Bus\Commands\Subscriber\UnsubscribeSubscriberCommand;
+use CachetHQ\Cachet\Bus\Commands\Subscriber\UnsubscribeSubscriptionCommand;
 use CachetHQ\Cachet\Bus\Commands\Subscriber\VerifySubscriberCommand;
 use CachetHQ\Cachet\Bus\Exceptions\Subscriber\AlreadySubscribedException;
-use CachetHQ\Cachet\Facades\Setting;
 use CachetHQ\Cachet\Models\Subscriber;
+use CachetHQ\Cachet\Models\Subscription;
 use GrahamCampbell\Binput\Facades\Binput;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * This is the subscribe controller.
+ *
+ * @author James Brooks <james@alt-three.com>
+ */
 class SubscribeController extends Controller
 {
     /**
@@ -36,7 +43,7 @@ class SubscribeController extends Controller
     public function showSubscribe()
     {
         return View::make('subscribe')
-            ->withAboutApp(Markdown::convertToHtml(Setting::get('app_about')));
+            ->withAboutApp(Markdown::convertToHtml(Config::get('setting.app_about')));
     }
 
     /**
@@ -47,9 +54,10 @@ class SubscribeController extends Controller
     public function postSubscribe()
     {
         $email = Binput::get('email');
+        $subscriptions = Binput::get('subscriptions');
 
         try {
-            dispatch(new SubscribeSubscriberCommand($email));
+            dispatch(new SubscribeSubscriberCommand($email, false, $subscriptions));
         } catch (AlreadySubscribedException $e) {
             return Redirect::route('subscribe.subscribe')
                 ->withTitle(sprintf('<strong>%s</strong> %s', trans('dashboard.notifications.whoops'), trans('cachet.subscriber.email.failure')))
@@ -94,10 +102,11 @@ class SubscribeController extends Controller
      * Handle the unsubscribe.
      *
      * @param string|null $code
+     * @param int|null    $subscription
      *
      * @return \Illuminate\View\View
      */
-    public function getUnsubscribe($code = null)
+    public function getUnsubscribe($code = null, $subscription = null)
     {
         if ($code === null) {
             throw new NotFoundHttpException();
@@ -109,7 +118,11 @@ class SubscribeController extends Controller
             throw new BadRequestHttpException();
         }
 
-        dispatch(new UnsubscribeSubscriberCommand($subscriber));
+        if ($subscription) {
+            dispatch(new UnsubscribeSubscriptionCommand(Subscription::forSubscriber($subscriber->id)->firstOrFail()));
+        } else {
+            dispatch(new UnsubscribeSubscriberCommand($subscriber, $subscription));
+        }
 
         return Redirect::route('status-page')
             ->withSuccess(sprintf('<strong>%s</strong> %s', trans('dashboard.notifications.awesome'), trans('cachet.subscriber.email.unsubscribed')));
